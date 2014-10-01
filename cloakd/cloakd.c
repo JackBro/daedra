@@ -4,9 +4,6 @@
 #include <linux/netlink.h>
 #include <net/sock.h>
 
-MODULE_LICENSE("GPL");
-MODULE_AUTHOR("unixbeard");
-
 
 struct cloakd_params 
 {
@@ -24,7 +21,7 @@ static struct cloakd_params params = {
 static void nl_recv_cmd(struct sk_buff*);
 
 struct netlink_kernel_cfg nl_kern_cfg = {
-    .groups = 1,
+    .groups = 1,            /* <------ Do I really need this? */
     .input = nl_recv_cmd,
 };
 
@@ -56,7 +53,14 @@ static void reveal_itself(void)
 */
 static void nl_recv_cmd(struct sk_buff *sk_buf)
 {
+    int pid;    /* pid of the calling process */
+    struct nlmsghdr *msg_hdr;
+
     printk(KERN_INFO "cloakd: netlink command\n");
+    msg_hdr = (struct nlmsghdr*)sk_buf->data;
+    pid = msg_hdr->nlmsg_pid;
+
+    printk(KERN_INFO "cloakd: pid %d is calling us\n", pid);
 }
 
 static void netlink_init(void)
@@ -78,6 +82,10 @@ static void __exit cloakd_exit(void)
     netlink_kernel_release(params.nl_sock);
 }
 
-
+/*****************************************************************************/
 module_init(cloakd_init);
 module_exit(cloakd_exit);
+
+MODULE_LICENSE("GPL");
+MODULE_AUTHOR("unixbeard");
+/*****************************************************************************/
