@@ -5,6 +5,8 @@
 #include <net/sock.h>
 
 #include "crypto.h"
+#include "commands.h"
+
 
 struct cloakd_params 
 {
