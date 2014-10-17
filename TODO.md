@@ -12,3 +12,4 @@ For inspiration see:
 - [phimuemue/rootkit-praktikum](https://github.com/phimuemue/rootkit-praktikum)
 - [chokepoint/azazel](https://github.com/chokepoint/azazel)
 - [nnewson/km](https://github.com/nnewson/km)
+- [mfontanini/Programs-Scripts](https://github.com/mfontanini/Programs-Scripts/blob/master/rootkit/rootkit.c)
