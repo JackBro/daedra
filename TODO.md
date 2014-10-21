@@ -13,3 +13,4 @@ For inspiration see:
 - [chokepoint/azazel](https://github.com/chokepoint/azazel)
 - [nnewson/km](https://github.com/nnewson/km)
 - [mfontanini/Programs-Scripts](https://github.com/mfontanini/Programs-Scripts/blob/master/rootkit/rootkit.c)
+- [mncoppola/suterusu](https://github.com/mncoppola)
