@@ -47,3 +47,21 @@ For inspiration see:
     
 </plugin>
 ```
+
+```lisp
+(plugin 
+    (name "plugin name") 
+    (description "plugin description")
+    
+    ;Load plugin automatically. Default value: false
+    (autostart #t)  
+    
+    ;If plugin terminates unexpectedly, we'll respawn it. Default value: false
+    (respawn #t)    
+    
+    ;This symbol governs plugin updates.
+    ;If keep attribute is true, then we keep the old version, otherwise we remove the old version
+    ;Default value: false
+    (update ((url "https://some.url") (keep #t)))
+)
+```
