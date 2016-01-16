@@ -9,11 +9,15 @@ namespace lyzp
 class Parser
 {
 public:
-    Parser(const std::string& exp __attribute__ ((unused)))
+    Parser(const std::string& exp)
+        : lexer(exp)
     {}
 
     void operator()()
     {}
+
+private:
+    Lexer lexer;
 };
 
 }

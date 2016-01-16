@@ -4,10 +4,12 @@
 namespace lyzp
 {
 
-struct Token
-{
+struct LeftParenTokenType;
+struct RightParenTokenType;
 
-};
+template<class TokenType> struct Token;
+template<> struct Token<LeftParenTokenType> {};
+template<> struct Token<RightParenTokenType> {};
 
 }
 
