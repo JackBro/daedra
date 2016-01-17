@@ -14,7 +14,10 @@ public:
     {}
 
     void operator()()
-    {}
+    {
+        for (const auto& token : lexer)
+            (void)token; 
+    }
 
 private:
     Lexer lexer;

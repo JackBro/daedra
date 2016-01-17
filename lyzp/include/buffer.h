@@ -30,10 +30,10 @@ public:
         //TODO: Implement this ctor as well
     }
 
-    ~Buffer()
-    {
-        delete[] buf;
-    }
+    ~Buffer() { delete[] buf; }
+
+    Buffer(const Buffer& buf) = delete;
+    Buffer& operator=(const Buffer& buf) = delete;
 
     const value_type& operator[](size_t idx) const
     {
@@ -43,8 +43,7 @@ public:
         return buf[idx];
     }
 
-    Buffer(const Buffer& buf) = delete;
-    Buffer& operator=(const Buffer& buf) = delete;
+    size_t size() const { return buf_size; }
 
 private:
     size_t buf_size;
