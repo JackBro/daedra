@@ -5,9 +5,35 @@
 ;;; Comment tests
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
+
+; one semi-colon
+;; two semi-colons
+;;; three semi-colons
+;;;; four semi-colons
+;;;;; five semi-colons
+;;;;;; six semi-colons
+;;;;;;; seven semi-colons
+;;;;;;;; eight semi-colons
+;;;;;;;;; nine semi-colons
+;;;;;;;;;; ten semi-colons
+
+
+; one semi-colon ;
+;; two semi-colons ;;
+;;; three semi-colons ;;;
+;;;; four semi-colons ;;;;
+;;;;; five semi-colons ;;;;;
+;;;;;; six semi-colons ;;;;;;
+;;;;;;; seven semi-colons ;;;;;;;
+;;;;;;;; eight semi-colons ;;;;;;;;
+;;;;;;;;; nine semi-colons ;;;;;;;;;
+;;;;;;;;;; ten semi-colons ;;;;;;;;;;
+
+
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; COMMENT TEST
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
 
 ;;;; At the top of source files
 ;;; Comments at the beginning of the line
@@ -27,10 +53,13 @@
           ;
         ;                           
         
-  
+
+
+
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; Whitespace tests
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
 ( ) ; Space character between parens
 ( ) ; Tab character between parens
 (
