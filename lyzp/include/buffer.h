@@ -38,7 +38,7 @@ public:
     const value_type& operator[](size_t idx) const
     {
         if (idx >= buf_size)
-            throw std::out_of_range("Index is out of range");
+            throw std::out_of_range("Index is out of range: size=" + std::to_string(buf_size) + " index=" + std::to_string(idx));
 
         return buf[idx];
     }

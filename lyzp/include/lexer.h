@@ -4,6 +4,7 @@
 #include <string>
 #include <token.h>
 #include <buffer.h>
+#include <iostream>
 
 namespace lyzp
 {
@@ -21,17 +22,22 @@ public:
         // Constructor for our 'begin' iterator
         explicit iterator(const Buffer& b)
             : buf(b)
-        {}
+        {
+            advance(); 
+        }
 
         // Constructor for our 'end' iterator
         explicit iterator(const Buffer& b, size_t s)
             : buf(b), index(s)
-        {}
+        {
+            token.kind = TOKEN_KIND::EOI;
+        }
 
         bool operator==(const iterator& other) const
         {
-            return (buf[index] == char(0) && buf[index + 1] == char(0)
-                        && other.buf[other.index - 2] == char(0) && other.buf[other.index - 1] == char(0));
+            return token.kind == other.token.kind;
+            //return (buf[index] == char(0) && buf[index + 1] == char(0)
+            //            && other.buf[other.index - 2] == char(0) && other.buf[other.index - 1] == char(0));
         }
 
         bool operator!=(const iterator& other) const
@@ -41,7 +47,7 @@ public:
 
         iterator& operator++()
         {
-            index++;
+            advance();
             return *this;
         }
 
@@ -52,12 +58,44 @@ public:
             return it;
         }
 
-        Buffer::value_type operator*() const { return buf[index]; }
-        const Buffer::value_type* operator->() const { return &buf[index]; }
+        Token operator*() const { return token; }
+        const Token* operator->() const { return &token; }
 
     private:
+        void advance()
+        { 
+            skip_whitespace();
+
+            if (buf[index] == char(0))
+            {
+                token.kind = TOKEN_KIND::EOI;
+                token.repr = "";
+                return;
+            }
+
+            if (buf[index] == '(')
+            {
+                token.kind = TOKEN_KIND::LEFT_PAREN;
+                token.repr = "(";
+            }
+            else if (buf[index] == ')')
+            {
+                token.kind = TOKEN_KIND::RIGHT_PAREN;
+                token.repr = ")";
+            }
+
+            index++;
+        }
+
+        void skip_whitespace()
+        {
+            while (isspace(buf[index]))
+                index++;
+        }
+
         const Buffer& buf;
         size_t index = 0;
+        Token token;
     };  // End of iterator
         
     iterator begin() { return iterator(buf); }
