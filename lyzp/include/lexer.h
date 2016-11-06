@@ -64,32 +64,58 @@ public:
     private:
         void advance()
         { 
-            skip_whitespace();
+            skip();
 
             if (buf[index] == char(0))
             {
-                token.kind = TOKEN_KIND::EOI;
-                token.repr = "";
+                set_token(TOKEN_KIND::EOI);
                 return;
             }
 
             if (buf[index] == '(')
-            {
-                token.kind = TOKEN_KIND::LEFT_PAREN;
-                token.repr = "(";
-            }
+                set_token(TOKEN_KIND::LEFT_PAREN, "(", true);
             else if (buf[index] == ')')
-            {
-                token.kind = TOKEN_KIND::RIGHT_PAREN;
-                token.repr = ")";
-            }
+                set_token(TOKEN_KIND::RIGHT_PAREN, ")", true);
+            else
+                set_token(TOKEN_KIND::INVALID, std::string(1, buf[index]));
+        }
 
-            index++;
+        void skip()
+        {
+            for (;;)
+            {
+                skip_comment();
+                skip_whitespace();
+
+                if (buf[index] != ';')
+                    return;
+            }
         }
 
         void skip_whitespace()
         {
             while (isspace(buf[index]))
+                index++;
+        }
+
+        void skip_comment()
+        {
+            if (buf[index] != ';')
+                return;
+
+            while (buf[index] != '\n' && buf[index] != char(0)) 
+                index++;
+
+            if (buf[index] == char(0))
+                set_token(TOKEN_KIND::EOI);
+        }
+
+        void set_token(TOKEN_KIND kind, const std::string& repr = "", bool increment = false)
+        {
+            token.kind = kind;
+            token.repr = repr;
+
+            if (increment)
                 index++;
         }
 
