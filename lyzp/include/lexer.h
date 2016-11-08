@@ -65,7 +65,11 @@ public:
         void advance()
         { 
             skip();
+            recognize_token();
+        }
 
+        void recognize_token()
+        {
             if (buf[index] == char(0))
             {
                 set_token(TOKEN_KIND::EOI);
@@ -95,7 +99,16 @@ public:
         void skip_whitespace()
         {
             while (isspace(buf[index]))
+            {
+                if (buf[index] == '\n')
+                {
+                    line++;
+                    position = 0;
+                }
+
                 index++;
+                position++;
+            }
         }
 
         void skip_comment()
@@ -114,13 +127,20 @@ public:
         {
             token.kind = kind;
             token.repr = repr;
+            token.line = line;
+            token.position = position;
 
             if (increment)
+            {
                 index++;
+                position++;
+            }
         }
 
         const Buffer& buf;
         size_t index = 0;
+        size_t line = 1;
+        size_t position = 1;
         Token token;
     };  // End of iterator
         

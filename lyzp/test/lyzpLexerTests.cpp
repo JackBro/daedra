@@ -47,6 +47,81 @@ TEST(LexerTestSuite, iterTestCase2_1)
     EXPECT_EQ(LexerIterSimpleTest(exp)(), exp.size());
 }
 
+TEST(LexerTestSuite, iterTestCase2_2)
+{
+    LexerIterSimpleTest lex(")");
+    lex();
+    EXPECT_EQ(lex.token.line, 1);
+    EXPECT_EQ(lex.token.position, 1);
+}
+
+TEST(LexerTestSuite, iterTestCase2_3)
+{
+    LexerIterSimpleTest lex(" )");
+    lex();
+    EXPECT_EQ(lex.token.line, 1);
+    EXPECT_EQ(lex.token.position, 2);
+}
+
+TEST(LexerTestSuite, iterTestCase2_4)
+{
+    LexerIterSimpleTest lex("\n)");
+    lex();
+    EXPECT_EQ(lex.token.line, 2);
+    EXPECT_EQ(lex.token.position, 1);
+}
+
+TEST(LexerTestSuite, iterTestCase2_5)
+{
+    LexerIterSimpleTest lex("\n\n   )");
+    lex();
+    EXPECT_EQ(lex.token.line, 3);
+    EXPECT_EQ(lex.token.position, 4);
+}
+
+TEST(LexerTestSuite, iterTestCase2_6)
+{
+    std::string exp =
+        ";;;;;;;;;;;;;;;;;;;;;;;;;;######;;;;;;;;;;;;;;;;;;;;;;;;   \n"
+        ";; (ANOTHER COMMENT TEST)                                  \n"
+        ";;;;;;;;;;;;;;;;;;;;;;;;;;######;;;;;;;;;;;;;;;;;;;;;;;;   \n"
+        "                    \t)    ;;;;  ()                        \n"
+        ";;;; Single token ----^                                    \n"
+        ;
+    LexerIterSimpleTest lex(exp);
+    lex();
+    EXPECT_EQ(lex.token.line, 4);
+    EXPECT_EQ(lex.token.position, 22);
+}
+
+TEST(LexerTestSuite, iterTestCase2_7)
+{
+    std::string exp =
+        "                                                                               )";
+    LexerIterSimpleTest lex(exp);
+    lex();
+    EXPECT_EQ(lex.token.line, 1);
+    EXPECT_EQ(lex.token.position, 80);
+}
+
+TEST(LexerTestSuite, iterTestCase2_8)
+{
+    std::string exp = "\n\t\n  \n;\n  \n\n\n\n         (";
+    LexerIterSimpleTest lex(exp);
+    lex();
+    EXPECT_EQ(lex.token.line, 9);
+    EXPECT_EQ(lex.token.position, 10);
+}
+
+TEST(LexerTestSuite, iterTestCase2_9)
+{
+    std::string exp = "\n\t\n  \n;\n  \n\n\n\n\n(";
+    LexerIterSimpleTest lex(exp);
+    lex();
+    EXPECT_EQ(lex.token.line, 10);
+    EXPECT_EQ(lex.token.position, 1);
+}
+
 TEST(LexerTestSuite, iterTestCase3)
 {
     std::string exp = "()";

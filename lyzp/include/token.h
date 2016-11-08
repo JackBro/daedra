@@ -3,14 +3,7 @@
 
 namespace lyzp
 {
-/*
-struct LeftParenTokenType;
-struct RightParenTokenType;
 
-template<class TokenType> struct Token;
-template<> struct Token<LeftParenTokenType> {};
-template<> struct Token<RightParenTokenType> {};
-*/
 enum class TOKEN_KIND
 {
     SOI,    // Start of input
@@ -23,11 +16,12 @@ enum class TOKEN_KIND
 struct Token
 {
     Token()
-        : kind(TOKEN_KIND::SOI)
+        : kind(TOKEN_KIND::SOI), line(1), position(1)
     {}
 
     TOKEN_KIND kind;
     std::string repr;
+    size_t line, position;
 };
 
 }
