@@ -6,11 +6,12 @@ namespace lyzp
 
 enum class TOKEN_KIND
 {
-    SOI,    // Start of input
-    LEFT_PAREN,
-    RIGHT_PAREN,
+    SOI             = 0,    // Start of input
+    LEFT_PAREN      = 1,
+    RIGHT_PAREN     = 2,
+    PLUS            = 3,
     INVALID,
-    EOI     // End of input
+    EOI                     // End of input
 };
 
 struct Token

@@ -11,22 +11,27 @@ struct LexerIterSimpleTest
     {
         for (const auto& tok : lexer)
         {
-            token = tok;
-            /*
-            std::cout << static_cast<std::underlying_type<lyzp::TOKEN_KIND>::type>(token.kind)
-                      << " " << token.repr
-                      << " (" << (int)token.repr[0] << ")"
-                      << std::endl;
-            */
-            tokens++;
+            recognized_tokens.push_back(tok);
+            //print_token_info(token);
         }
 
-        return tokens;
+        if (!recognized_tokens.empty())
+            last_token = recognized_tokens.back();
+        return recognized_tokens.size();
+    }
+
+    void print_token_info(lyzp::Token tok)
+    {
+        std::cout << "Kind: <" << static_cast<std::underlying_type<lyzp::TOKEN_KIND>::type>(tok.kind) << ">, "
+                  << "Repr: <" << tok.repr << ">, "
+                  << "Line: " << tok.line << ", "
+                  << "Position: " << tok.position
+                  << std::endl;
     }
 
     lyzp::Lexer lexer;
-    lyzp::Token token;
-    size_t tokens = 0;
+    lyzp::Token last_token;
+    std::vector<lyzp::Token> recognized_tokens;
 };
 
 TEST(LexerTestSuite, iterTestCase1)
@@ -51,32 +56,32 @@ TEST(LexerTestSuite, iterTestCase2_2)
 {
     LexerIterSimpleTest lex(")");
     lex();
-    EXPECT_EQ(lex.token.line, 1);
-    EXPECT_EQ(lex.token.position, 1);
+    EXPECT_EQ(lex.last_token.line, 1);
+    EXPECT_EQ(lex.last_token.position, 1);
 }
 
 TEST(LexerTestSuite, iterTestCase2_3)
 {
     LexerIterSimpleTest lex(" )");
     lex();
-    EXPECT_EQ(lex.token.line, 1);
-    EXPECT_EQ(lex.token.position, 2);
+    EXPECT_EQ(lex.last_token.line, 1);
+    EXPECT_EQ(lex.last_token.position, 2);
 }
 
 TEST(LexerTestSuite, iterTestCase2_4)
 {
     LexerIterSimpleTest lex("\n)");
     lex();
-    EXPECT_EQ(lex.token.line, 2);
-    EXPECT_EQ(lex.token.position, 1);
+    EXPECT_EQ(lex.last_token.line, 2);
+    EXPECT_EQ(lex.last_token.position, 1);
 }
 
 TEST(LexerTestSuite, iterTestCase2_5)
 {
     LexerIterSimpleTest lex("\n\n   )");
     lex();
-    EXPECT_EQ(lex.token.line, 3);
-    EXPECT_EQ(lex.token.position, 4);
+    EXPECT_EQ(lex.last_token.line, 3);
+    EXPECT_EQ(lex.last_token.position, 4);
 }
 
 TEST(LexerTestSuite, iterTestCase2_6)
@@ -90,8 +95,8 @@ TEST(LexerTestSuite, iterTestCase2_6)
         ;
     LexerIterSimpleTest lex(exp);
     lex();
-    EXPECT_EQ(lex.token.line, 4);
-    EXPECT_EQ(lex.token.position, 22);
+    EXPECT_EQ(lex.last_token.line, 4);
+    EXPECT_EQ(lex.last_token.position, 22);
 }
 
 TEST(LexerTestSuite, iterTestCase2_7)
@@ -100,8 +105,8 @@ TEST(LexerTestSuite, iterTestCase2_7)
         "                                                                               )";
     LexerIterSimpleTest lex(exp);
     lex();
-    EXPECT_EQ(lex.token.line, 1);
-    EXPECT_EQ(lex.token.position, 80);
+    EXPECT_EQ(lex.last_token.line, 1);
+    EXPECT_EQ(lex.last_token.position, 80);
 }
 
 TEST(LexerTestSuite, iterTestCase2_8)
@@ -109,8 +114,8 @@ TEST(LexerTestSuite, iterTestCase2_8)
     std::string exp = "\n\t\n  \n;\n  \n\n\n\n         (";
     LexerIterSimpleTest lex(exp);
     lex();
-    EXPECT_EQ(lex.token.line, 9);
-    EXPECT_EQ(lex.token.position, 10);
+    EXPECT_EQ(lex.last_token.line, 9);
+    EXPECT_EQ(lex.last_token.position, 10);
 }
 
 TEST(LexerTestSuite, iterTestCase2_9)
@@ -118,8 +123,8 @@ TEST(LexerTestSuite, iterTestCase2_9)
     std::string exp = "\n\t\n  \n;\n  \n\n\n\n\n(";
     LexerIterSimpleTest lex(exp);
     lex();
-    EXPECT_EQ(lex.token.line, 10);
-    EXPECT_EQ(lex.token.position, 1);
+    EXPECT_EQ(lex.last_token.line, 10);
+    EXPECT_EQ(lex.last_token.position, 1);
 }
 
 TEST(LexerTestSuite, iterTestCase3)
@@ -150,56 +155,66 @@ TEST(LexerTestSuite, iterTestCase7)
 {
     LexerIterSimpleTest lex(" ");
     lex();
-    EXPECT_TRUE(lex.token.kind == lyzp::TOKEN_KIND::SOI);
+    EXPECT_TRUE(lex.last_token.kind == lyzp::TOKEN_KIND::SOI);
 }
 
 TEST(LexerTestSuite, iterTestCase8)
 {
     LexerIterSimpleTest lex(" \t\n\v\f\r ");
     lex();
-    EXPECT_TRUE(lex.token.kind == lyzp::TOKEN_KIND::SOI);
+    EXPECT_TRUE(lex.last_token.kind == lyzp::TOKEN_KIND::SOI);
 }
 
 TEST(LexerTestSuite, iterTestCase9)
 {
     LexerIterSimpleTest lex(" ( ");
     lex();
-    EXPECT_TRUE(lex.token.kind == lyzp::TOKEN_KIND::LEFT_PAREN);
+    EXPECT_TRUE(lex.last_token.kind == lyzp::TOKEN_KIND::LEFT_PAREN);
 }
 
 TEST(LexerTestSuite, iterTestCase9_1)
 {
     LexerIterSimpleTest lex("\n ( \t");
     lex();
-    EXPECT_TRUE(lex.token.kind == lyzp::TOKEN_KIND::LEFT_PAREN);
+    EXPECT_TRUE(lex.last_token.kind == lyzp::TOKEN_KIND::LEFT_PAREN);
 }
 
 TEST(LexerTestSuite, iterTestCase10)
 {
     LexerIterSimpleTest lex(" ) ");
     lex();
-    EXPECT_TRUE(lex.token.kind == lyzp::TOKEN_KIND::RIGHT_PAREN);
+    EXPECT_TRUE(lex.last_token.kind == lyzp::TOKEN_KIND::RIGHT_PAREN);
 }
 
 TEST(LexerTestSuite, iterTestCase10_1)
 {
     LexerIterSimpleTest lex("\r )\f ");
     lex();
-    EXPECT_TRUE(lex.token.kind == lyzp::TOKEN_KIND::RIGHT_PAREN);
+    EXPECT_TRUE(lex.last_token.kind == lyzp::TOKEN_KIND::RIGHT_PAREN);
 }
 
 TEST(LexerTestSuite, iterTestCase11)
 {
     LexerIterSimpleTest lex("  \t\n\v\f\r (  \t\n\v\f\r ");
     lex();
-    EXPECT_TRUE(lex.token.kind == lyzp::TOKEN_KIND::LEFT_PAREN);
+    EXPECT_TRUE(lex.last_token.kind == lyzp::TOKEN_KIND::LEFT_PAREN);
+}
+
+TEST(LexerTestSuite, iterTestCase11_1)
+{
+    LexerIterSimpleTest lex("  \t\n\v\f\r (  \t\n\v\f\r + \t\n\v\f\r  )");
+    lex();
+    EXPECT_EQ(lex.recognized_tokens.size(), 3); 
+    EXPECT_TRUE(lex.recognized_tokens[0].kind == lyzp::TOKEN_KIND::LEFT_PAREN);
+    EXPECT_TRUE(lex.recognized_tokens[1].kind == lyzp::TOKEN_KIND::PLUS);
+    EXPECT_TRUE(lex.recognized_tokens[2].kind == lyzp::TOKEN_KIND::RIGHT_PAREN);
 }
 
 TEST(LexerTestSuite, iterTestCase12)
 {
     LexerIterSimpleTest lex("  \t\n\v\f\r    )     \t\n\v\f\r ");
     lex();
-    EXPECT_TRUE(lex.token.kind == lyzp::TOKEN_KIND::RIGHT_PAREN);
+    EXPECT_TRUE(lex.last_token.kind == lyzp::TOKEN_KIND::RIGHT_PAREN);
 }
 
 TEST(LexerTestSuite, iterTestCase13)
@@ -236,35 +251,123 @@ TEST(LexerTestSuite, iterTestCase18)
 {
     LexerIterSimpleTest lex(";");
     lex();
-    EXPECT_TRUE(lex.token.kind == lyzp::TOKEN_KIND::SOI);
+    EXPECT_TRUE(lex.last_token.kind == lyzp::TOKEN_KIND::SOI);
 }
 
 TEST(LexerTestSuite, iterTestCase19)
 {
     LexerIterSimpleTest lex(";\n");
     lex();
-    EXPECT_TRUE(lex.token.kind == lyzp::TOKEN_KIND::SOI);
+    EXPECT_TRUE(lex.last_token.kind == lyzp::TOKEN_KIND::SOI);
 }
 
 TEST(LexerTestSuite, iterTestCase20)
 {
     LexerIterSimpleTest lex(";;;;;;;;;");
     lex();
-    EXPECT_TRUE(lex.token.kind == lyzp::TOKEN_KIND::SOI);
+    EXPECT_TRUE(lex.last_token.kind == lyzp::TOKEN_KIND::SOI);
 }
 
 TEST(LexerTestSuite, iterTestCase21)
 {
     LexerIterSimpleTest lex(";()");
     lex();
-    EXPECT_TRUE(lex.token.kind == lyzp::TOKEN_KIND::SOI);
+    EXPECT_TRUE(lex.last_token.kind == lyzp::TOKEN_KIND::SOI);
 }
 
 TEST(LexerTestSuite, iterTestCase22)
 {
     LexerIterSimpleTest lex(";; 10 ; Atom");
     lex();
-    EXPECT_TRUE(lex.token.kind == lyzp::TOKEN_KIND::SOI);
+    EXPECT_TRUE(lex.last_token.kind == lyzp::TOKEN_KIND::SOI);
+}
+
+TEST(LexerTestSuite, iterTestCase22_1)
+{
+    LexerIterSimpleTest lex("+");
+    lex();
+    EXPECT_TRUE(lex.last_token.kind == lyzp::TOKEN_KIND::PLUS);
+}
+
+TEST(LexerTestSuite, iterTestCase22_2)
+{
+    LexerIterSimpleTest lex("(+)");
+    lex();
+    EXPECT_EQ(lex.recognized_tokens.size(), 3); 
+    EXPECT_TRUE(lex.recognized_tokens[0].kind == lyzp::TOKEN_KIND::LEFT_PAREN);
+    EXPECT_TRUE(lex.recognized_tokens[1].kind == lyzp::TOKEN_KIND::PLUS);
+    EXPECT_TRUE(lex.recognized_tokens[2].kind == lyzp::TOKEN_KIND::RIGHT_PAREN);
+}
+
+TEST(LexerTestSuite, iterTestCase22_3)
+{
+    LexerIterSimpleTest lex("\n(\t+\n)\n");
+    lex();
+    EXPECT_EQ(lex.recognized_tokens.size(), 3); 
+    EXPECT_TRUE(lex.recognized_tokens[0].kind == lyzp::TOKEN_KIND::LEFT_PAREN);
+    EXPECT_TRUE(lex.recognized_tokens[1].kind == lyzp::TOKEN_KIND::PLUS);
+    EXPECT_TRUE(lex.recognized_tokens[2].kind == lyzp::TOKEN_KIND::RIGHT_PAREN);
+}
+
+TEST(LexerTestSuite, iterTestCase22_4)
+{
+    LexerIterSimpleTest lex("(+ () ())");
+    lex();
+    EXPECT_EQ(lex.recognized_tokens.size(), 7); 
+    EXPECT_TRUE(lex.recognized_tokens[0].kind == lyzp::TOKEN_KIND::LEFT_PAREN);
+    EXPECT_TRUE(lex.recognized_tokens[1].kind == lyzp::TOKEN_KIND::PLUS);
+    EXPECT_TRUE(lex.recognized_tokens[2].kind == lyzp::TOKEN_KIND::LEFT_PAREN);
+    EXPECT_TRUE(lex.recognized_tokens[3].kind == lyzp::TOKEN_KIND::RIGHT_PAREN);
+    EXPECT_TRUE(lex.recognized_tokens[4].kind == lyzp::TOKEN_KIND::LEFT_PAREN);
+    EXPECT_TRUE(lex.recognized_tokens[5].kind == lyzp::TOKEN_KIND::RIGHT_PAREN);
+    EXPECT_TRUE(lex.recognized_tokens[6].kind == lyzp::TOKEN_KIND::RIGHT_PAREN);
+}
+
+TEST(LexerTestSuite, iterTestCase22_5)
+{
+    std::string exp =
+        "(                      \n"
+        "    +                  \n"
+        "        ()             \n"
+        "        ()             \n"
+        ")\n";
+    LexerIterSimpleTest lex(exp);
+    lex();
+    EXPECT_EQ(lex.recognized_tokens.size(), 7); 
+    EXPECT_TRUE(lex.recognized_tokens[0].kind == lyzp::TOKEN_KIND::LEFT_PAREN);
+    EXPECT_TRUE(lex.recognized_tokens[1].kind == lyzp::TOKEN_KIND::PLUS);
+    EXPECT_TRUE(lex.recognized_tokens[2].kind == lyzp::TOKEN_KIND::LEFT_PAREN);
+    EXPECT_TRUE(lex.recognized_tokens[3].kind == lyzp::TOKEN_KIND::RIGHT_PAREN);
+    EXPECT_TRUE(lex.recognized_tokens[4].kind == lyzp::TOKEN_KIND::LEFT_PAREN);
+    EXPECT_TRUE(lex.recognized_tokens[5].kind == lyzp::TOKEN_KIND::RIGHT_PAREN);
+    EXPECT_TRUE(lex.recognized_tokens[6].kind == lyzp::TOKEN_KIND::RIGHT_PAREN);
+}
+
+TEST(LexerTestSuite, iterTestCase22_6)
+{
+    std::string exp =
+        "(                      \n"
+        "   +                   \n"
+        "       ()             \n"
+        "       ()             \n"
+        ")\n";
+    LexerIterSimpleTest lex(exp);
+    lex();
+    EXPECT_EQ(lex.recognized_tokens.size(), 7); 
+    EXPECT_EQ(lex.recognized_tokens[0].line, 1);
+    EXPECT_EQ(lex.recognized_tokens[0].position, 1);
+    EXPECT_EQ(lex.recognized_tokens[1].line, 2);
+    EXPECT_EQ(lex.recognized_tokens[1].position, 4);
+    EXPECT_EQ(lex.recognized_tokens[2].line, 3);
+    EXPECT_EQ(lex.recognized_tokens[2].position, 8);
+    EXPECT_EQ(lex.recognized_tokens[3].line, 3);
+    EXPECT_EQ(lex.recognized_tokens[3].position, 9);
+    EXPECT_EQ(lex.recognized_tokens[4].line, 4);
+    EXPECT_EQ(lex.recognized_tokens[4].position, 8);
+    EXPECT_EQ(lex.recognized_tokens[5].line, 4);
+    EXPECT_EQ(lex.recognized_tokens[5].position, 9);
+    EXPECT_EQ(lex.recognized_tokens[6].line, 5);
+    EXPECT_EQ(lex.recognized_tokens[6].position, 1);
 }
 
 TEST(LexerTestSuite, iterTestCase23)
@@ -307,7 +410,11 @@ TEST(LexerTestSuite, iterTestCase27)
         "(\n"
         "; this \"Canonical S-expression\" has 5 atoms"
         "\n)";
-    EXPECT_EQ(LexerIterSimpleTest(exp)(), 2);
+    LexerIterSimpleTest lex(exp);
+    lex();
+    EXPECT_EQ(lex.recognized_tokens.size(), 2);
+    EXPECT_TRUE(lex.recognized_tokens[0].kind == lyzp::TOKEN_KIND::LEFT_PAREN);
+    EXPECT_TRUE(lex.recognized_tokens[1].kind == lyzp::TOKEN_KIND::RIGHT_PAREN);
 }
 
 TEST(LexerTestSuite, iterTestCase28)
@@ -347,7 +454,11 @@ TEST(LexerTestSuite, iterTestCase29)
         ";;;;;;;; eight semi-colons ;;;;;;;;            \n"
         ";;;;;;;;; nine semi-colons ;;;;;;;;;           \n"
         ";;;;;;;;;; ten semi-colons ;;;;;;;;;;          \n";
-    EXPECT_EQ(LexerIterSimpleTest(exp)(), 2);
+    LexerIterSimpleTest lex(exp);
+    lex();
+    EXPECT_EQ(lex.recognized_tokens.size(), 2);
+    EXPECT_TRUE(lex.recognized_tokens[0].kind == lyzp::TOKEN_KIND::LEFT_PAREN);
+    EXPECT_TRUE(lex.recognized_tokens[1].kind == lyzp::TOKEN_KIND::RIGHT_PAREN);
 }
 
 TEST(LexerTestSuite, iterTestCase30)
@@ -380,5 +491,11 @@ TEST(LexerTestSuite, iterTestCase30)
         " (     ); () empty list                                    \n"
         ";^-----^----- Third and fourth tokens                      \n"
         ;
-    EXPECT_EQ(LexerIterSimpleTest(exp)(), 4);
+    LexerIterSimpleTest lex(exp);
+    lex();
+    EXPECT_EQ(lex.recognized_tokens.size(), 4);
+    EXPECT_TRUE(lex.recognized_tokens[0].kind == lyzp::TOKEN_KIND::LEFT_PAREN);
+    EXPECT_TRUE(lex.recognized_tokens[1].kind == lyzp::TOKEN_KIND::RIGHT_PAREN);
+    EXPECT_TRUE(lex.recognized_tokens[2].kind == lyzp::TOKEN_KIND::LEFT_PAREN);
+    EXPECT_TRUE(lex.recognized_tokens[3].kind == lyzp::TOKEN_KIND::RIGHT_PAREN);
 }

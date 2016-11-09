@@ -36,8 +36,6 @@ public:
         bool operator==(const iterator& other) const
         {
             return token.kind == other.token.kind;
-            //return (buf[index] == char(0) && buf[index + 1] == char(0)
-            //            && other.buf[other.index - 2] == char(0) && other.buf[other.index - 1] == char(0));
         }
 
         bool operator!=(const iterator& other) const
@@ -80,8 +78,10 @@ public:
                 set_token(TOKEN_KIND::LEFT_PAREN, "(", true);
             else if (buf[index] == ')')
                 set_token(TOKEN_KIND::RIGHT_PAREN, ")", true);
+            else if (buf[index] == '+')
+                set_token(TOKEN_KIND::PLUS, "+", true);
             else
-                set_token(TOKEN_KIND::INVALID, std::string(1, buf[index]));
+                set_token(TOKEN_KIND::INVALID, std::string(1, buf[index]), true);
         }
 
         void skip()
