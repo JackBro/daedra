@@ -70,18 +70,26 @@ public:
         {
             if (buf[index] == char(0))
             {
-                set_token(TOKEN_KIND::EOI);
+                set_token(TOKEN_KIND::EOI, "", false);
                 return;
             }
 
             if (buf[index] == '(')
-                set_token(TOKEN_KIND::LEFT_PAREN, "(", true);
+                set_token(TOKEN_KIND::LEFT_PAREN, "(");
             else if (buf[index] == ')')
-                set_token(TOKEN_KIND::RIGHT_PAREN, ")", true);
+                set_token(TOKEN_KIND::RIGHT_PAREN, ")");
+            else if (buf[index] == '+' && isdigit(peek()))
+                scan_number();
             else if (buf[index] == '+')
-                set_token(TOKEN_KIND::PLUS, "+", true);
+                set_token(TOKEN_KIND::PLUS, "+");
+            else if (buf[index] == '-' && isdigit(peek()))
+                scan_number();
+            else if (buf[index] == '-')
+                set_token(TOKEN_KIND::MINUS, "-");
+            else if (isdigit(buf[index]))
+                scan_number();
             else
-                set_token(TOKEN_KIND::INVALID, std::string(1, buf[index]), true);
+                set_token(TOKEN_KIND::INVALID, std::string(1, buf[index]), false);
         }
 
         void skip()
@@ -116,14 +124,39 @@ public:
             if (buf[index] != ';')
                 return;
 
-            while (buf[index] != '\n' && buf[index] != char(0)) 
+            while (buf[index] != '\n' && !is_eoi()) 
                 index++;
 
-            if (buf[index] == char(0))
-                set_token(TOKEN_KIND::EOI);
+            if (is_eoi())
+                set_token(TOKEN_KIND::EOI, "", false);
         }
 
-        void set_token(TOKEN_KIND kind, const std::string& repr = "", bool increment = false)
+        void scan_number()
+        {
+            std::string sign;
+            if (buf[index] == '+' || buf[index] == '-')
+            {
+                sign += buf[index]; 
+                index++;
+            }
+
+            std::string number = sign;
+            while (isdigit(buf[index]))
+            {
+                number += buf[index];
+                index++;
+            }
+
+            // When we set token here, don't increment the index,
+            // for buf[index] is not a digit anymore, it's a different character
+            set_token(TOKEN_KIND::NUMBER, number, false);
+        } 
+
+        Buffer::value_type peek() { return buf[index + 1]; }
+
+        bool is_eoi() { return buf[index] == char(0); }
+
+        void set_token(TOKEN_KIND kind, const std::string& repr = "", bool increment = true)
         {
             token.kind = kind;
             token.repr = repr;
@@ -131,10 +164,9 @@ public:
             token.position = position;
 
             if (increment)
-            {
                 index++;
-                position++;
-            }
+ 
+            position += repr.size();
         }
 
         const Buffer& buf;

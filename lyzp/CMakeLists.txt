@@ -6,7 +6,7 @@ link_directories(${lyzp_BINARY_DIR}/bin)
 
 option(UnitTests "Build tests" OFF)
 
-set(CMAKE_CXX_FLAGS "-g -std=c++11 -W -Wall -Werror")
+set(CMAKE_CXX_FLAGS "-g -std=c++14 -W -Wall -Werror")
 add_executable(lyzp ${lyzp_SOURCE_DIR}/src/lyzp.cpp)
 
 if (UnitTests)

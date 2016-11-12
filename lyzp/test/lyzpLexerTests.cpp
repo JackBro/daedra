@@ -12,7 +12,7 @@ struct LexerIterSimpleTest
         for (const auto& tok : lexer)
         {
             recognized_tokens.push_back(tok);
-            //print_token_info(token);
+            //print_token_info(tok);
         }
 
         if (!recognized_tokens.empty())
@@ -23,7 +23,7 @@ struct LexerIterSimpleTest
     void print_token_info(lyzp::Token tok)
     {
         std::cout << "Kind: <" << static_cast<std::underlying_type<lyzp::TOKEN_KIND>::type>(tok.kind) << ">, "
-                  << "Repr: <" << tok.repr << ">, "
+                  << "Repr: <`" << tok.repr << "`>, "
                   << "Line: " << tok.line << ", "
                   << "Position: " << tok.position
                   << std::endl;
@@ -370,6 +370,81 @@ TEST(LexerTestSuite, iterTestCase22_6)
     EXPECT_EQ(lex.recognized_tokens[6].position, 1);
 }
 
+TEST(LexerTestSuite, iterTestCase22_7)
+{
+    LexerIterSimpleTest lex("(10)");
+    lex();
+    EXPECT_EQ(lex.recognized_tokens.size(), 3); 
+    EXPECT_TRUE(lex.recognized_tokens[0].kind == lyzp::TOKEN_KIND::LEFT_PAREN);
+    EXPECT_TRUE(lex.recognized_tokens[1].kind == lyzp::TOKEN_KIND::NUMBER);
+    EXPECT_TRUE(lex.recognized_tokens[2].kind == lyzp::TOKEN_KIND::RIGHT_PAREN);
+}
+
+TEST(LexerTestSuite, iterTestCase22_8)
+{
+    LexerIterSimpleTest lex("( 10 )");
+    lex();
+    EXPECT_EQ(lex.recognized_tokens.size(), 3); 
+    EXPECT_TRUE(lex.recognized_tokens[0].kind == lyzp::TOKEN_KIND::LEFT_PAREN);
+    EXPECT_TRUE(lex.recognized_tokens[1].kind == lyzp::TOKEN_KIND::NUMBER);
+    EXPECT_TRUE(lex.recognized_tokens[2].kind == lyzp::TOKEN_KIND::RIGHT_PAREN);
+}
+
+TEST(LexerTestSuite, iterTestCase22_9)
+{
+    LexerIterSimpleTest lex("(+ 1 2)");
+    lex();
+    EXPECT_EQ(lex.recognized_tokens.size(), 5); 
+    EXPECT_TRUE(lex.recognized_tokens[0].kind == lyzp::TOKEN_KIND::LEFT_PAREN);
+    EXPECT_TRUE(lex.recognized_tokens[1].kind == lyzp::TOKEN_KIND::PLUS);
+    EXPECT_TRUE(lex.recognized_tokens[2].kind == lyzp::TOKEN_KIND::NUMBER);
+    EXPECT_TRUE(lex.recognized_tokens[3].kind == lyzp::TOKEN_KIND::NUMBER);
+    EXPECT_TRUE(lex.recognized_tokens[4].kind == lyzp::TOKEN_KIND::RIGHT_PAREN);
+}
+
+TEST(LexerTestSuite, iterTestCase22_10)
+{
+    LexerIterSimpleTest lex("(+ -1 -2)");
+    lex();
+    EXPECT_EQ(lex.recognized_tokens.size(), 5); 
+    EXPECT_TRUE(lex.recognized_tokens[0].kind == lyzp::TOKEN_KIND::LEFT_PAREN);
+    EXPECT_TRUE(lex.recognized_tokens[1].kind == lyzp::TOKEN_KIND::PLUS);
+    EXPECT_TRUE(lex.recognized_tokens[2].kind == lyzp::TOKEN_KIND::NUMBER);
+    EXPECT_TRUE(lex.recognized_tokens[3].kind == lyzp::TOKEN_KIND::NUMBER);
+    EXPECT_TRUE(lex.recognized_tokens[4].kind == lyzp::TOKEN_KIND::RIGHT_PAREN);
+}
+
+TEST(LexerTestSuite, iterTestCase22_11)
+{
+    LexerIterSimpleTest lex("(- +101 -202)");
+    lex();
+    EXPECT_EQ(lex.recognized_tokens.size(), 5); 
+    EXPECT_TRUE(lex.recognized_tokens[0].kind == lyzp::TOKEN_KIND::LEFT_PAREN);
+    EXPECT_TRUE(lex.recognized_tokens[1].kind == lyzp::TOKEN_KIND::MINUS);
+    EXPECT_TRUE(lex.recognized_tokens[2].kind == lyzp::TOKEN_KIND::NUMBER);
+    EXPECT_TRUE(lex.recognized_tokens[3].kind == lyzp::TOKEN_KIND::NUMBER);
+    EXPECT_TRUE(lex.recognized_tokens[4].kind == lyzp::TOKEN_KIND::RIGHT_PAREN);
+}
+
+TEST(LexerTestSuite, iterTestCase22_12)
+{
+    LexerIterSimpleTest lex("(0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20)");
+    lex();
+    EXPECT_EQ(lex.recognized_tokens.size(), 23); 
+    EXPECT_EQ(lex.recognized_tokens[0].kind, lyzp::TOKEN_KIND::LEFT_PAREN);
+    for (size_t i = 1; i < 22; i++)
+        EXPECT_EQ(lex.recognized_tokens[i].kind, lyzp::TOKEN_KIND::NUMBER);
+
+    EXPECT_EQ(lex.recognized_tokens[22].kind, lyzp::TOKEN_KIND::RIGHT_PAREN);
+}
+
+TEST(LexerTestSuite, iterTestCase22_13)
+{
+    LexerIterSimpleTest lex("(+ (- (+ 1 2 3) (+ 4 5 6)))");
+    lex();
+    EXPECT_EQ(lex.recognized_tokens.size(), 18); 
+}
+
 TEST(LexerTestSuite, iterTestCase23)
 {
     EXPECT_EQ(LexerIterSimpleTest("() ; ()")(), 2);
@@ -498,4 +573,72 @@ TEST(LexerTestSuite, iterTestCase30)
     EXPECT_TRUE(lex.recognized_tokens[1].kind == lyzp::TOKEN_KIND::RIGHT_PAREN);
     EXPECT_TRUE(lex.recognized_tokens[2].kind == lyzp::TOKEN_KIND::LEFT_PAREN);
     EXPECT_TRUE(lex.recognized_tokens[3].kind == lyzp::TOKEN_KIND::RIGHT_PAREN);
+}
+
+TEST(LexerTestSuite, numberTestCase1)
+{
+    std::string exp = "0";
+    lyzp::Lexer lex(exp);
+    auto it = lex.begin();
+    EXPECT_EQ(it->kind, lyzp::TOKEN_KIND::NUMBER);
+    EXPECT_EQ(it->repr, exp);
+    EXPECT_EQ(it->line, 1);
+    EXPECT_EQ(it->position, 1);
+}
+
+TEST(LexerTestSuite, numberTestCase2)
+{
+    std::string exp = "+1";
+    lyzp::Lexer lex(exp);
+    auto it = lex.begin();
+    EXPECT_EQ(it->kind, lyzp::TOKEN_KIND::NUMBER);
+    EXPECT_EQ(it->repr, exp);
+    EXPECT_EQ(it->line, 1);
+    EXPECT_EQ(it->position, 1);
+}
+
+TEST(LexerTestSuite, numberTestCase3)
+{
+    std::string exp = "-2";
+    lyzp::Lexer lex(exp);
+    auto it = lex.begin();
+    EXPECT_EQ(it->kind, lyzp::TOKEN_KIND::NUMBER);
+    EXPECT_EQ(it->repr, exp);
+    EXPECT_EQ(it->line, 1);
+    EXPECT_EQ(it->position, 1);
+}
+
+TEST(LexerTestSuite, numberTestCase4)
+{
+    std::string num = "42";
+    std::string exp = "\n" + num + "\n";
+    lyzp::Lexer lex(exp);
+    auto it = lex.begin();
+    EXPECT_EQ(it->kind, lyzp::TOKEN_KIND::NUMBER);
+    EXPECT_EQ(it->repr, num);
+    EXPECT_EQ(it->line, 2);
+    EXPECT_EQ(it->position, 1);
+}
+
+TEST(LexerTestSuite, numberTestCase5)
+{
+    std::string num = "12345678901234567890";
+    std::string exp = "\n\t \n \v \f \r " + num + " \n\t \n \v \f \r";
+    lyzp::Lexer lex(exp);
+    auto it = lex.begin();
+    EXPECT_EQ(it->kind, lyzp::TOKEN_KIND::NUMBER);
+    EXPECT_EQ(it->repr, num);
+    EXPECT_EQ(it->line, 3);
+    EXPECT_EQ(it->position, 8);
+}
+
+TEST(LexerTestSuite, numberTestCase6)
+{
+    std::string num = "12345678901234567890";
+    std::string exp = "( " + num + " )";
+    LexerIterSimpleTest lex(exp);
+    lex();
+    EXPECT_EQ(lex.recognized_tokens[0].position, 1);
+    EXPECT_EQ(lex.recognized_tokens[1].position, 3);
+    EXPECT_EQ(lex.recognized_tokens[2].position, 24);
 }

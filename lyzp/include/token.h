@@ -10,6 +10,8 @@ enum class TOKEN_KIND
     LEFT_PAREN      = 1,
     RIGHT_PAREN     = 2,
     PLUS            = 3,
+    MINUS           = 4,
+    NUMBER          = 5,
     INVALID,
     EOI                     // End of input
 };
