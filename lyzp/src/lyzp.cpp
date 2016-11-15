@@ -2,6 +2,6 @@
 
 int main(int argc __attribute__ ((unused)), char** argv __attribute__ ((unused)))
 {
-    lyzp::Parser("()")();
+    lyzp::Parser("(+ 1 2 3)")();
     return EXIT_SUCCESS;
 }

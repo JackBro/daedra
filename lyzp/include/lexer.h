@@ -133,6 +133,10 @@ public:
 
         void scan_number()
         {
+            /////////////////////////////////////////////////////////////////////////////
+            // TODO: Handle case like this:
+            // 1a2
+            /////////////////////////////////////////////////////////////////////////////
             std::string sign;
             if (buf[index] == '+' || buf[index] == '-')
             {
@@ -149,12 +153,25 @@ public:
 
             // When we set token here, don't increment the index,
             // for buf[index] is not a digit anymore, it's a different character
-            set_token(TOKEN_KIND::NUMBER, number, false);
+            if (is_delimiter())
+            {
+                set_token(TOKEN_KIND::NUMBER, number, false);
+                return;
+            }
+
+            position += number.size();
+            set_token(TOKEN_KIND::INVALID, std::string(1, buf[index]), true);
         } 
 
-        Buffer::value_type peek() { return buf[index + 1]; }
+        Buffer::value_type peek() const { return buf[index + 1]; }
 
         bool is_eoi() { return buf[index] == char(0); }
+
+        bool is_delimiter() const
+        {
+            static std::string delimiters = "();\"'`|[]{} \n\t\v\f\r" + std::string(1, char(0));
+            return delimiters.find(buf[index]) != std::string::npos;
+        }
 
         void set_token(TOKEN_KIND kind, const std::string& repr = "", bool increment = true)
         {

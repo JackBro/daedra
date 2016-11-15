@@ -1,6 +1,7 @@
 #include <lexer.h>
 #include <gtest/gtest.h>
 
+
 struct LexerIterSimpleTest
 {
     LexerIterSimpleTest(const std::string& exp)
@@ -12,7 +13,7 @@ struct LexerIterSimpleTest
         for (const auto& tok : lexer)
         {
             recognized_tokens.push_back(tok);
-            //print_token_info(tok);
+            print_token_info(tok);
         }
 
         if (!recognized_tokens.empty())
@@ -641,4 +642,29 @@ TEST(LexerTestSuite, numberTestCase6)
     EXPECT_EQ(lex.recognized_tokens[0].position, 1);
     EXPECT_EQ(lex.recognized_tokens[1].position, 3);
     EXPECT_EQ(lex.recognized_tokens[2].position, 24);
+}
+
+TEST(LexerTestSuite, numberTestCase7)
+{
+    LexerIterSimpleTest lex("4z2");
+    lex();
+    EXPECT_EQ(lex.recognized_tokens[0].kind, lyzp::TOKEN_KIND::INVALID);
+}
+
+TEST(LexerTestSuite, numberTestCase8)
+{
+    LexerIterSimpleTest lex("42z");
+    lex();
+    EXPECT_EQ(lex.recognized_tokens[0].kind, lyzp::TOKEN_KIND::INVALID);
+    EXPECT_EQ(lex.recognized_tokens[0].repr, "z");
+    EXPECT_EQ(lex.recognized_tokens[0].position, 3);
+}
+
+TEST(LexerTestSuite, numberTestCase9)
+{
+    LexerIterSimpleTest lex("(+ 4 2y)");
+    lex();
+    EXPECT_EQ(lex.recognized_tokens[3].kind, lyzp::TOKEN_KIND::INVALID);
+    EXPECT_EQ(lex.recognized_tokens[3].repr, "y");
+    EXPECT_EQ(lex.recognized_tokens[3].position, 7);
 }
