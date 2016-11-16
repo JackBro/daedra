@@ -1,6 +1,9 @@
 #ifndef LYZP_TOKEN_H
 #define LYZP_TOKEN_H
 
+#include <iostream>
+
+
 namespace lyzp
 {
 
@@ -26,6 +29,16 @@ struct Token
     std::string repr;
     size_t line, position;
 };
+
+inline std::ostream& operator<<(std::ostream& os, const Token& tok)
+{
+    os << "Kind: <" << static_cast<std::underlying_type<lyzp::TOKEN_KIND>::type>(tok.kind) << ">, "
+       << "Repr: <`" << tok.repr << "`>, "
+       << "Line: " << tok.line << ", "
+       << "Position: " << tok.position;
+
+    return os;
+}
 
 }
 

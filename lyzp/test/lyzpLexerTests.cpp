@@ -13,21 +13,12 @@ struct LexerIterSimpleTest
         for (const auto& tok : lexer)
         {
             recognized_tokens.push_back(tok);
-            print_token_info(tok);
+            std::cout << tok << "\n";
         }
 
         if (!recognized_tokens.empty())
             last_token = recognized_tokens.back();
         return recognized_tokens.size();
-    }
-
-    void print_token_info(lyzp::Token tok)
-    {
-        std::cout << "Kind: <" << static_cast<std::underlying_type<lyzp::TOKEN_KIND>::type>(tok.kind) << ">, "
-                  << "Repr: <`" << tok.repr << "`>, "
-                  << "Line: " << tok.line << ", "
-                  << "Position: " << tok.position
-                  << std::endl;
     }
 
     lyzp::Lexer lexer;

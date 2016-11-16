@@ -17,17 +17,8 @@ public:
     {
         for (const auto& tok : lexer)
         {
-            print_token_info(tok);
+            std::cout << tok << "\n";  
         }
-    }
-
-    void print_token_info(const lyzp::Token& tok)
-    {
-        std::cout << "Kind: <" << static_cast<std::underlying_type<lyzp::TOKEN_KIND>::type>(tok.kind) << ">, "
-                  << "Repr: <`" << tok.repr << "`>, "
-                  << "Line: " << tok.line << ", "
-                  << "Position: " << tok.position
-                  << std::endl;
     }
 
 private:
