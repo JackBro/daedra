@@ -6,30 +6,29 @@ namespace lyzp
 
 void Parser::parse()
 {
-    ProgramNode prog("lyzp program");
     while (token_iter != std::end(tokens))
-        expression(prog);
-    ast << prog;
+        expression(ast);
 }
 
 void Parser::expression(AstNode& ast_node)
 {
     // <expression> --> <variable> | <literal> | <procedure call>
     std::cout << __func__ << ": current token: " << *token_iter << "\n";
-    ExpressionNode exp_node;
 
     if (token_iter->kind == TOKEN_KIND::LEFT_PAREN)
     {
         match(TOKEN_KIND::LEFT_PAREN);
+        ExpressionNode exp_node;
         list_expression(exp_node);
+        ast_node << exp_node;
         match(TOKEN_KIND::RIGHT_PAREN);
     }
     else if (is_literal())
-        literal(exp_node);
+    {
+        literal(ast_node);
+    }
     else
         throw std::domain_error("Bad expression");
-
-    ast_node << exp_node;
 }
 
 void Parser::list_expression(AstNode& ast_node)

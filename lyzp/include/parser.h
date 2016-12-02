@@ -59,7 +59,7 @@ private:
     }
 
     Lexer lexer;
-    AstNode ast;
+    ProgramNode ast;
 
     std::list<Token> tokens;
     std::list<Token>::iterator token_iter;
