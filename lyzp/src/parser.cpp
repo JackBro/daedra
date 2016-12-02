@@ -4,10 +4,11 @@
 namespace lyzp
 {
 
-void Parser::parse()
+const AstNode& Parser::parse()
 {
     while (token_iter != std::end(tokens))
         expression(ast);
+    return ast;
 }
 
 void Parser::expression(AstNode& ast_node)

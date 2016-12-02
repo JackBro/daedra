@@ -1,7 +1,15 @@
-#include <parser.h>
+#include <evaluator.h>
 
-int main(int argc __attribute__ ((unused)), char** argv __attribute__ ((unused)))
+int main(int argc, char** argv)
 {
-    lyzp::Parser("(- (+ 1 2 3) (+ 4 5))").parse();
+    if (argc < 2)
+    {
+        std::cerr << "No expression to evaluate\n";
+        return EXIT_FAILURE;
+    }
+
+    lyzp::Evaluator e(argv[1]);
+    e.eval();
+
     return EXIT_SUCCESS;
 }
