@@ -25,7 +25,8 @@ public:
         print_ast_node(ast);
     }
 
-    const AstNode& parse();
+    void parse();
+    const AstNode& get_ast() const { return ast; }
 
 private:
     void expression(AstNode&);
